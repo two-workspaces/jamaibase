@@ -22,4 +22,4 @@ ENV OWL_PORT=6969 \
 
 # Owl creates its schema on first boot, so it waits for Postgres and ClickHouse
 # instead of crash-looping while they start.
-CMD ["/bin/bash", "-c", "until (: </dev/tcp/$PGHOST/5432) 2>/dev/null && curl -sf http://$OWL_CLICKHOUSE_HOST:8123/ping >/dev/null; do echo Waiting for Postgres and ClickHouse; sleep 2; done; exec uv run --no-sync python -m owl.entrypoints.api"]
+CMD ["/bin/bash", "-c", "until (: </dev/tcp/$PGHOST/5432) 2>/dev/null && curl -sf http://$OWL_CLICKHOUSE_HOST:8123/ping >/dev/null; do echo Waiting for Postgres and ClickHouse; sleep 2; done; exec uv run python -m owl.entrypoints.api"]

@@ -59,7 +59,7 @@
       "build": {},
       "deploy": {
         "startCommand": null,
-        "healthcheckPath": "/",
+        "healthcheckPath": "/project",
         "restartPolicyType": "ON_FAILURE",
         "restartPolicyMaxRetries": 10
       },
@@ -240,7 +240,7 @@
       "name": "Starling",
       "build": {},
       "deploy": {
-        "startCommand": "/bin/bash -c \"until curl -sf http://$OWL_API_HOST:6969/api/health >/dev/null; do echo Waiting for Owl; sleep 3; done; exec uv run --no-sync celery -A owl.entrypoints.starling worker --loglevel=warning --max-memory-per-child 1048576 --concurrency=2 --beat\"",
+        "startCommand": "/bin/bash -c \"until curl -sf http://$OWL_API_HOST:6969/api/health >/dev/null; do echo Waiting for Owl; sleep 3; done; exec uv run celery -A owl.entrypoints.starling worker --loglevel=warning --max-memory-per-child 1048576 --concurrency=2 --beat\"",
         "healthcheckPath": null,
         "restartPolicyType": "ON_FAILURE",
         "restartPolicyMaxRetries": 10
@@ -588,6 +588,11 @@
         "MAX_SIZE_BYTES": {
           "defaultValue": "20971520",
           "description": "Largest code payload Kopi accepts",
+          "isOptional": false
+        },
+        "MAX_CONCURRENT_EXECUTIONS": {
+          "defaultValue": "1",
+          "description": "Python code cells run at once. Each worker keeps a Pyodide runtime in memory (~1.1 GB); extra cells queue",
           "isOptional": false
         }
       }
