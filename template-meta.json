@@ -5,5 +5,6 @@
   "category": "AI/ML",
   "image": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
   "card_desc": "JamAI Base: build AI pipelines as spreadsheets. Columns run LLMs, code and RAG over your documents; Knowledge, Action and Chat tables with an API and SDKs. Bring your own OpenAI, Anthropic, Gemini or OpenRouter keys. Password gate, Postgres, ClickHouse, MinIO included.",
-  "id": "eafb8b1f-c523-426f-8e6f-a3c1109f2e60"
+  "id": "eafb8b1f-c523-426f-8e6f-a3c1109f2e60",
+  "published": true
 }
