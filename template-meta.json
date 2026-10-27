@@ -1,0 +1,8 @@
+{
+  "name": "JamAI Base | AI Spreadsheet Backend with RAG and Agents",
+  "short_name": "JamAI Base",
+  "description": "Spreadsheet-style AI pipelines: LLM columns, RAG and chat agents",
+  "category": "AI/ML",
+  "image": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+  "card_desc": "JamAI Base: build AI pipelines as spreadsheets. Columns run LLMs, code and RAG over your documents; Knowledge, Action and Chat tables with an API and SDKs. Bring your own OpenAI, Anthropic, Gemini or OpenRouter keys. Password gate, Postgres, ClickHouse, MinIO included."
+}

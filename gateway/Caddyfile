@@ -1,0 +1,29 @@
+{
+	admin off
+}
+
+:{$PORT} {
+	route {
+		respond /healthz 200
+
+		# SDK and API clients: Authorization: Bearer <JAMAI_API_TOKEN>.
+		@api {
+			path /api/v1/* /api/v2/*
+			header Authorization "Bearer {$JAMAI_API_TOKEN}"
+		}
+		reverse_proxy @api {$OWL_HOST}:6969 {
+			header_up -Authorization
+		}
+
+		basic_auth {
+			{$JAMAI_USERNAME} {$JAMAI_PASSWORD_HASH}
+		}
+		# Signed file links point at /api/v2/files on this domain.
+		reverse_proxy /api/v2/files/* {$OWL_HOST}:6969 {
+			header_up -Authorization
+		}
+		reverse_proxy {$FRONTEND_HOST}:4000 {
+			header_up -Authorization
+		}
+	}
+}

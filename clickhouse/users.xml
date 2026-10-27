@@ -1,0 +1,9 @@
+<clickhouse>
+    <!-- Upstream docker/ch_configs/clickhouse_user_config.xml -->
+    <profiles>
+        <default>
+            <allow_experimental_time_series_table>1</allow_experimental_time_series_table>
+            <allow_experimental_json_type>1</allow_experimental_json_type>
+        </default>
+    </profiles>
+</clickhouse>

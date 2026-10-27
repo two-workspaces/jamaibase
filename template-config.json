@@ -1,0 +1,596 @@
+{
+  "services": {
+    "ac6e0d70-bb16-4468-a847-17c12202d29a": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Gateway",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/healthz",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/gateway"
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "volumeMounts": {},
+      "variables": {
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port Caddy listens on - leave as is",
+          "isOptional": false
+        },
+        "JAMAI_USERNAME": {
+          "defaultValue": "admin",
+          "description": "Username for the JamAI Base UI",
+          "isOptional": false
+        },
+        "JAMAI_PASSWORD": {
+          "defaultValue": "${{secret(24, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Password for the JamAI Base UI. JamAI Base OSS has no login of its own; this gate is what keeps strangers out",
+          "isOptional": false
+        },
+        "JAMAI_API_TOKEN": {
+          "defaultValue": "${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Bearer token for the API and SDKs (Authorization: Bearer <token>)",
+          "isOptional": false
+        },
+        "OWL_HOST": {
+          "defaultValue": "${{Owl.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Owl API on the private network",
+          "isOptional": false
+        },
+        "FRONTEND_HOST": {
+          "defaultValue": "${{Frontend.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Frontend on the private network",
+          "isOptional": false
+        }
+      }
+    },
+    "5d19ef3c-fc05-4936-84f9-15dab9cbe53b": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Frontend",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/frontend"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {
+        "PORT": {
+          "defaultValue": "4000",
+          "description": "Port the frontend listens on - leave as is",
+          "isOptional": false
+        },
+        "FRONTEND_PORT": {
+          "defaultValue": "4000",
+          "description": "Must match PORT",
+          "isOptional": false
+        },
+        "OWL_URL": {
+          "defaultValue": "http://${{Owl.RAILWAY_PRIVATE_DOMAIN}}:6969",
+          "description": "Owl API on the private network",
+          "isOptional": false
+        },
+        "ORIGIN": {
+          "defaultValue": "https://${{Gateway.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL of the app",
+          "isOptional": false
+        },
+        "AUTH_SECRET": {
+          "defaultValue": "${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Session secret required by the frontend's auth library",
+          "isOptional": false
+        }
+      }
+    },
+    "641abe9a-cd49-49c6-a22e-c3475a1fb8db": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Owl",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/api/health",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/owl"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {
+        "OWL_DB_PATH": {
+          "defaultValue": "postgresql+psycopg://${{Postgres.POSTGRES_USER}}:${{Postgres.POSTGRES_PASSWORD}}@${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{Postgres.POSTGRES_DB}}",
+          "description": "Postgres connection (pgroonga + pgvectorscale)",
+          "isOptional": false
+        },
+        "PGHOST": {
+          "defaultValue": "${{Postgres.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Postgres host Owl waits for on boot",
+          "isOptional": false
+        },
+        "OWL_REDIS_HOST": {
+          "defaultValue": "${{Redis.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Redis for cache, locks and the Celery queue",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_HOST": {
+          "defaultValue": "${{ClickHouse.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "ClickHouse for usage meters",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_USER": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_USER}}",
+          "description": "ClickHouse user",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_PASSWORD": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_PASSWORD}}",
+          "description": "ClickHouse password",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_DB": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_DB}}",
+          "description": "ClickHouse database",
+          "isOptional": false
+        },
+        "OWL_S3_ENDPOINT": {
+          "defaultValue": "http://${{MinIO.RAILWAY_PRIVATE_DOMAIN}}:9000",
+          "description": "MinIO on the private network",
+          "isOptional": false
+        },
+        "OWL_S3_ACCESS_KEY_ID": {
+          "defaultValue": "${{MinIO.MINIO_ROOT_USER}}",
+          "description": "MinIO access key",
+          "isOptional": false
+        },
+        "OWL_S3_SECRET_ACCESS_KEY": {
+          "defaultValue": "${{MinIO.MINIO_ROOT_PASSWORD}}",
+          "description": "MinIO secret key",
+          "isOptional": false
+        },
+        "OWL_FILE_DIR": {
+          "defaultValue": "s3://${{MinIO.MINIO_BUCKET}}",
+          "description": "Bucket for uploaded files",
+          "isOptional": false
+        },
+        "OWL_FILE_PROXY_URL": {
+          "defaultValue": "${{Gateway.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public host that signed file links point at",
+          "isOptional": false
+        },
+        "OWL_GOTENBERG_URL": {
+          "defaultValue": "http://${{Gotenberg.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Gotenberg converts Office and HTML files to PDF",
+          "isOptional": false
+        },
+        "OWL_CODE_EXECUTOR_ENDPOINT": {
+          "defaultValue": "http://${{Kopi.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Kopi runs Python code columns in a sandbox",
+          "isOptional": false
+        },
+        "OWL_OPENTELEMETRY_HOST": {
+          "defaultValue": "${{OTel.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "OpenTelemetry collector",
+          "isOptional": false
+        },
+        "OWL_VLM_MODEL_ID": {
+          "defaultValue": "openai/gpt-4o-mini",
+          "description": "Vision model that reads PDFs and Office files for Knowledge Tables. Must match the ID of a chat model with image input you added under Models",
+          "isOptional": false
+        },
+        "OWL_OPENAI_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: OpenAI key for the organization, set before first boot (you can add keys in the UI later)",
+          "isOptional": true
+        },
+        "OWL_ANTHROPIC_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: Anthropic key, set before first boot",
+          "isOptional": true
+        },
+        "OWL_GEMINI_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: Gemini key, set before first boot",
+          "isOptional": true
+        },
+        "OWL_OPENROUTER_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: OpenRouter key, set before first boot",
+          "isOptional": true
+        },
+        "PORT": {
+          "defaultValue": "6969",
+          "description": "Port Owl listens on - leave as is",
+          "isOptional": false
+        },
+        "OWL_WORKERS": {
+          "defaultValue": "1",
+          "description": "API worker processes; each adds ~300 MB",
+          "isOptional": false
+        },
+        "OWL_ENCRYPTION_KEY": {
+          "defaultValue": "${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Encrypts provider keys and code-column secrets. Never change it after saving keys",
+          "isOptional": false
+        }
+      }
+    },
+    "6120f202-ad47-46bb-8b3a-9ed60e8bda30": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Starling",
+      "build": {},
+      "deploy": {
+        "startCommand": "/bin/bash -c \"until curl -sf http://$OWL_API_HOST:6969/api/health >/dev/null; do echo Waiting for Owl; sleep 3; done; exec uv run --no-sync celery -A owl.entrypoints.starling worker --loglevel=warning --max-memory-per-child 1048576 --concurrency=2 --beat\"",
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/owl"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {
+        "OWL_DB_PATH": {
+          "defaultValue": "postgresql+psycopg://${{Postgres.POSTGRES_USER}}:${{Postgres.POSTGRES_PASSWORD}}@${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{Postgres.POSTGRES_DB}}",
+          "description": "Postgres connection (pgroonga + pgvectorscale)",
+          "isOptional": false
+        },
+        "PGHOST": {
+          "defaultValue": "${{Postgres.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Postgres host Owl waits for on boot",
+          "isOptional": false
+        },
+        "OWL_REDIS_HOST": {
+          "defaultValue": "${{Redis.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Redis for cache, locks and the Celery queue",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_HOST": {
+          "defaultValue": "${{ClickHouse.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "ClickHouse for usage meters",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_USER": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_USER}}",
+          "description": "ClickHouse user",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_PASSWORD": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_PASSWORD}}",
+          "description": "ClickHouse password",
+          "isOptional": false
+        },
+        "OWL_CLICKHOUSE_DB": {
+          "defaultValue": "${{ClickHouse.CLICKHOUSE_DB}}",
+          "description": "ClickHouse database",
+          "isOptional": false
+        },
+        "OWL_S3_ENDPOINT": {
+          "defaultValue": "http://${{MinIO.RAILWAY_PRIVATE_DOMAIN}}:9000",
+          "description": "MinIO on the private network",
+          "isOptional": false
+        },
+        "OWL_S3_ACCESS_KEY_ID": {
+          "defaultValue": "${{MinIO.MINIO_ROOT_USER}}",
+          "description": "MinIO access key",
+          "isOptional": false
+        },
+        "OWL_S3_SECRET_ACCESS_KEY": {
+          "defaultValue": "${{MinIO.MINIO_ROOT_PASSWORD}}",
+          "description": "MinIO secret key",
+          "isOptional": false
+        },
+        "OWL_FILE_DIR": {
+          "defaultValue": "s3://${{MinIO.MINIO_BUCKET}}",
+          "description": "Bucket for uploaded files",
+          "isOptional": false
+        },
+        "OWL_FILE_PROXY_URL": {
+          "defaultValue": "${{Gateway.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public host that signed file links point at",
+          "isOptional": false
+        },
+        "OWL_GOTENBERG_URL": {
+          "defaultValue": "http://${{Gotenberg.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Gotenberg converts Office and HTML files to PDF",
+          "isOptional": false
+        },
+        "OWL_CODE_EXECUTOR_ENDPOINT": {
+          "defaultValue": "http://${{Kopi.RAILWAY_PRIVATE_DOMAIN}}:3000",
+          "description": "Kopi runs Python code columns in a sandbox",
+          "isOptional": false
+        },
+        "OWL_OPENTELEMETRY_HOST": {
+          "defaultValue": "${{OTel.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "OpenTelemetry collector",
+          "isOptional": false
+        },
+        "OWL_VLM_MODEL_ID": {
+          "defaultValue": "openai/gpt-4o-mini",
+          "description": "Vision model that reads PDFs and Office files for Knowledge Tables. Must match the ID of a chat model with image input you added under Models",
+          "isOptional": false
+        },
+        "OWL_OPENAI_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: OpenAI key for the organization, set before first boot (you can add keys in the UI later)",
+          "isOptional": true
+        },
+        "OWL_ANTHROPIC_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: Anthropic key, set before first boot",
+          "isOptional": true
+        },
+        "OWL_GEMINI_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: Gemini key, set before first boot",
+          "isOptional": true
+        },
+        "OWL_OPENROUTER_API_KEY": {
+          "defaultValue": "",
+          "description": "Optional: OpenRouter key, set before first boot",
+          "isOptional": true
+        },
+        "OWL_ENCRYPTION_KEY": {
+          "defaultValue": "${{Owl.OWL_ENCRYPTION_KEY}}",
+          "description": "Same key as Owl",
+          "isOptional": false
+        },
+        "OWL_API_HOST": {
+          "defaultValue": "${{Owl.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Owl, which Starling waits for on boot",
+          "isOptional": false
+        }
+      }
+    },
+    "220def3f-6f70-4b68-b26c-f3a237b48c83": {
+      "icon": "https://devicons.railway.app/i/postgresql.svg",
+      "name": "Postgres",
+      "build": {},
+      "deploy": {
+        "startCommand": "docker-entrypoint.sh postgres -c max_locks_per_transaction=512 -c pgroonga.enable_wal_resource_manager=on -c shared_preload_libraries=pgroonga_wal_resource_manager,pg_stat_statements",
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "ghcr.io/embeddedllm/jamaibase/postgres:20250305"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "22c86463-20d4-444f-96a4-e2fdf4c955b2": {
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      },
+      "variables": {
+        "POSTGRES_USER": {
+          "defaultValue": "owlpguser",
+          "description": "Postgres user",
+          "isOptional": false
+        },
+        "POSTGRES_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Auto-generated Postgres password",
+          "isOptional": false
+        },
+        "POSTGRES_DB": {
+          "defaultValue": "jamaibase_owl",
+          "description": "Postgres database",
+          "isOptional": false
+        },
+        "PGDATA": {
+          "defaultValue": "/var/lib/postgresql/data/pgdata",
+          "description": "Data directory inside the volume",
+          "isOptional": false
+        }
+      }
+    },
+    "4f434cdc-3a26-4506-8c20-731406509e8d": {
+      "icon": "https://devicons.railway.app/i/redis.svg",
+      "name": "Redis",
+      "build": {},
+      "deploy": {
+        "startCommand": "/bin/sh -c \"chown -R redis:redis /data && exec docker-entrypoint.sh redis-server --appendonly yes --protected-mode no\"",
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "redis:8.10.2-alpine"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "c963408f-1428-4a43-bbee-74dbe2323fef": {
+          "mountPath": "/data"
+        }
+      },
+      "variables": {}
+    },
+    "31a645bc-6e94-4b9c-bedb-b800f64540ae": {
+      "icon": "https://devicons.railway.app/i/clickhouse.svg",
+      "name": "ClickHouse",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/clickhouse"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "2d00ca65-1c6f-462a-94a4-b7a7aec3cacf": {
+          "mountPath": "/var/lib/clickhouse"
+        }
+      },
+      "variables": {
+        "CLICKHOUSE_DB": {
+          "defaultValue": "jamaibase_owl",
+          "description": "ClickHouse database",
+          "isOptional": false
+        },
+        "CLICKHOUSE_USER": {
+          "defaultValue": "owluser",
+          "description": "ClickHouse user",
+          "isOptional": false
+        },
+        "CLICKHOUSE_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Auto-generated ClickHouse password",
+          "isOptional": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "30",
+          "description": "Time for ClickHouse to shut down cleanly on redeploy",
+          "isOptional": false
+        }
+      }
+    },
+    "b3a5c38c-42c6-4018-ada4-59738ba5f5ea": {
+      "icon": "https://devicons.railway.app/i/opentelemetry.svg",
+      "name": "OTel",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "repo": "https://github.com/two-workspaces/jamaibase",
+        "rootDirectory": "/otel"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {}
+    },
+    "2fc89dc8-84c6-44ab-87bb-e6d671af2272": {
+      "icon": "https://devicons.railway.app/i/minio.svg",
+      "name": "MinIO",
+      "build": {},
+      "deploy": {
+        "startCommand": "/bin/bash -c \"(until mc alias set local http://127.0.0.1:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD >/dev/null 2>&1; do sleep 1; done; mc mb --ignore-existing local/$MINIO_BUCKET) & exec /usr/bin/docker-entrypoint.sh server /data --address :9000\"",
+        "healthcheckPath": null,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "pgsty/silo:RELEASE.2026-08-06T00-00-00Z"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "48937c39-1489-4884-bee9-a4f183bb04c5": {
+          "mountPath": "/data"
+        }
+      },
+      "variables": {
+        "MINIO_ROOT_USER": {
+          "defaultValue": "jamai",
+          "description": "MinIO access key",
+          "isOptional": false
+        },
+        "MINIO_ROOT_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Auto-generated MinIO secret key",
+          "isOptional": false
+        },
+        "MINIO_BUCKET": {
+          "defaultValue": "file",
+          "description": "Bucket for uploaded files, created on boot",
+          "isOptional": false
+        }
+      }
+    },
+    "0e129e94-474c-4d52-8965-894752b33d5a": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Gotenberg",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/health",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "gotenberg/gotenberg:8.39.0"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {
+        "PORT": {
+          "defaultValue": "3000",
+          "description": "Port Gotenberg listens on - leave as is",
+          "isOptional": false
+        }
+      }
+    },
+    "3dbab89a-8159-4bcd-91a0-89542ee1a1ea": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/jamaibase/main/icon.png",
+      "name": "Kopi",
+      "build": {},
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/health",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "ghcr.io/embeddedllm/v8-kopi/v8-kopi@sha256:4da92c972ac1b721fff213da65cfb8fde9278c4abdadee90b6ec0e150e5cf2fe"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {},
+      "variables": {
+        "PORT": {
+          "defaultValue": "3000",
+          "description": "Port Kopi listens on - leave as is",
+          "isOptional": false
+        },
+        "MAX_SIZE_BYTES": {
+          "defaultValue": "20971520",
+          "description": "Largest code payload Kopi accepts",
+          "isOptional": false
+        }
+      }
+    }
+  }
+}
